@@ -1,6 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
-import { UR } from 'getstream';
+import { Activity, UR } from 'getstream';
 
 import { LikeButton } from './LikeButton';
 import { RepostButton } from './RepostButton';
@@ -15,6 +15,7 @@ export type ActivityFooterProps<
   RT extends UR = UR,
   CRT extends UR = UR
 > = Pick<ActivityProps<UT, AT, CT, RT, CRT>, 'activity' | 'feedGroup' | 'userId' | 'className' | 'style'> & {
+  onLike?: (activity: Activity<AT>) => void;
   targetFeeds?: string[];
 };
 
@@ -28,6 +29,7 @@ export const ActivityFooter = <
   activity,
   feedGroup = 'user',
   userId,
+  onLike,
   targetFeeds,
   className,
   style,
@@ -36,7 +38,7 @@ export const ActivityFooter = <
     <div className="raf-activity-footer__left" />
     <div className="raf-activity-footer__right">
       <Flex a="center">
-        <LikeButton<UT, AT, CT, RT, CRT> activity={activity} targetFeeds={targetFeeds} />
+        <LikeButton<UT, AT, CT, RT, CRT> onLike={onLike} activity={activity} targetFeeds={targetFeeds} />
         <RepostButton<UT, AT, CT, RT, CRT>
           activity={activity}
           targetFeeds={targetFeeds}

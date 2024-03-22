@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { ReactElement, useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
-import { UR } from 'getstream';
+import { EnrichedUser, UR } from 'getstream';
 
 import { Feed, useFeedContext, DefaultAT, DefaultUT } from '../context';
 import { smartRender, ElementOrComponentOrLiteralType, PropsWithElementAttributes } from '../utils';
@@ -18,6 +18,8 @@ export type NotificationDropdownProps<
   PT extends UR = UR
 > = PropsWithElementAttributes<
   {
+    /** Callback to render avatar */
+    avatarRenderer?: (actor: EnrichedUser<UT>) => ReactElement;
     Icon?: ElementOrComponentOrLiteralType;
     width?: number;
   } & Pick<DropdownPanelProps, 'Footer' | 'Header' | 'right'> &
@@ -39,6 +41,7 @@ const NotificationDropdownInner = <
   right,
   className,
   style,
+  avatarRenderer,
   ...feedProps
 }: NotificationDropdownProps<UT, AT, CT, RT, CRT, PT>) => {
   const feed = useFeedContext<UT, AT, CT, RT, CRT, PT>();
@@ -65,7 +68,7 @@ const NotificationDropdownInner = <
       >
         {open && (
           <DropdownPanel arrow right={right} Header={Header} Footer={Footer}>
-            <NotificationFeed {...feedProps} />
+            <NotificationFeed avatarRenderer={avatarRenderer} {...feedProps} />
           </DropdownPanel>
         )}
       </div>
@@ -91,6 +94,7 @@ export const NotificationDropdown = <
   Icon,
   right,
   feedGroup = 'notification',
+  avatarRenderer,
   options,
   ...feedProps
 }: NotificationDropdownProps<UT, AT, CT, RT, CRT, PT>) => {
@@ -103,6 +107,7 @@ export const NotificationDropdown = <
         Footer={Footer}
         Header={Header}
         Icon={Icon}
+        avatarRenderer={avatarRenderer}
         right={right}
         {...feedProps}
         feedGroup={feedGroup}

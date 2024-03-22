@@ -1,4 +1,4 @@
-import React, { SyntheticEvent } from 'react';
+import React, { ReactElement, SyntheticEvent } from 'react';
 import { EnrichedActivity, EnrichedUser, NotificationActivityEnriched, UR } from 'getstream';
 import { TFunction } from 'i18next';
 
@@ -25,12 +25,15 @@ export type NotificationProps<
 > = PropsWithElementAttributes<{
   /** The activity group to display in this notification */
   activityGroup: NotificationActivityEnriched<UT, AT, CT, RT, CRT>;
+  /** Callback to render avatar */
+  avatarRenderer?: (actor: EnrichedUser<UT>) => ReactElement;
   /** Callback to call when clicking on a notification */
   onClickNotification?: (activityGroup: NotificationActivityEnriched<UT, AT, CT, RT, CRT>) => void;
   /** Callback to call when clicking on a user in the notification */
   onClickUser?: OnClickUserHandler<UT>;
   /** Callback to mark a notification as read, if not supplied the dropdown used to mark as read will not be shown */
   onMarkAsRead?: FeedManager<UT, AT, CT, RT, CRT>['onMarkAsRead'];
+  renderNotification?: (activityGroup: NotificationActivityEnriched<UT, AT, CT, RT, CRT>) => ReactElement;
 }>;
 
 const getUsers = <
@@ -48,6 +51,8 @@ const getHeaderText = (t: TFunction, activitiesLen: number, verb: string, actorN
     switch (verb) {
       case 'like':
         return t('{{ actorName }} liked your {{ activityVerb }}', { actorName, activityVerb });
+      case 'post':
+        return t('{{ actorName }} created a new {{ activityVerb }}', { actorName, activityVerb });
       case 'repost':
         return t('{{ actorName }} reposted your {{ activityVerb }}', { actorName, activityVerb });
       case 'follow':
@@ -55,7 +60,9 @@ const getHeaderText = (t: TFunction, activitiesLen: number, verb: string, actorN
       case 'comment':
         return t('{{ actorName }} commented on your {{ activityVerb }}', { actorName, activityVerb });
       default:
-        console.warn('No notification styling found for your verb, please create your own custom Notification group.');
+        console.warn(
+          `No notification styling found for your verb (${verb}), please create your own custom Notification group.`,
+        );
         return '';
     }
   }
@@ -64,6 +71,8 @@ const getHeaderText = (t: TFunction, activitiesLen: number, verb: string, actorN
     switch (verb) {
       case 'like':
         return t('{{ actorName }} and 1 other liked your {{ activityVerb }}', { actorName, activityVerb });
+      case 'post':
+        return t('{{ actorName }} and 1 other created a new {{ activityVerb }}', { actorName, activityVerb });
       case 'repost':
         return t('{{ actorName }} and 1 other reposted your {{ activityVerb }}', { actorName, activityVerb });
       case 'follow':
@@ -71,7 +80,9 @@ const getHeaderText = (t: TFunction, activitiesLen: number, verb: string, actorN
       case 'comment':
         return t('{{ actorName }} and 1 other commented on your {{ activityVerb }}', { actorName, activityVerb });
       default:
-        console.warn('No notification styling found for your verb, please create your own custom Notification group.');
+        console.warn(
+          `No notification styling found for your verb (${verb}), please create your own custom Notification group.`,
+        );
         return '';
     }
   }
@@ -80,6 +91,12 @@ const getHeaderText = (t: TFunction, activitiesLen: number, verb: string, actorN
   switch (verb) {
     case 'like':
       return t('{{ actorName }} and {{ countOtherActors }} others liked your {{ activityVerb }}', {
+        actorName,
+        activityVerb,
+        countOtherActors,
+      });
+    case 'post':
+      return t('{{ actorName }} and {{ countOtherActors }} others created a new {{ activityVerb }}', {
         actorName,
         activityVerb,
         countOtherActors,
@@ -102,7 +119,9 @@ const getHeaderText = (t: TFunction, activitiesLen: number, verb: string, actorN
         countOtherActors,
       });
     default:
-      console.warn('No notification styling found for your verb, please create your own custom Notification group.');
+      console.warn(
+        `No notification styling found for your verb (${verb}), please create your own custom Notification group.`,
+      );
       return '';
   }
 };
@@ -120,14 +139,20 @@ export const Notification = <
   onClickNotification,
   className,
   style,
+  avatarRenderer,
+  renderNotification,
 }: NotificationProps<UT, AT, CT, RT, CRT>) => {
   const { t, tDateTimeParser } = useTranslationContext();
   const { activities } = activityGroup;
   const [latestActivity, ...restOfActivities] = activities;
 
-  if (typeof latestActivity.object === 'string') return null;
+  //console.log("latestActivity", latestActivity);
+  //if (typeof latestActivity.object === 'string') return null;
 
-  const lastObject = latestActivity.object as EnrichedActivity;
+  const lastObject =
+    typeof latestActivity.object === 'string'
+      ? (latestActivity as EnrichedActivity)
+      : (latestActivity.object as EnrichedActivity);
   const lastActor = userOrDefault(latestActivity.actor);
   const headerText = getHeaderText(t, activities.length, latestActivity.verb, lastActor.data.name, lastObject.verb);
   const handleUserClick = useOnClickUser<UT>(onClickUser);
@@ -138,18 +163,24 @@ export const Notification = <
       }
     : undefined;
 
-  return (
+  return renderNotification ? (
+    renderNotification(activityGroup)
+  ) : (
     <div
       onClick={handleNotificationClick}
       className={className ?? `raf-notification ${activityGroup.is_read ? 'raf-notification--read' : ''}`}
       style={style}
     >
-      <Avatar
-        onClick={handleUserClick?.(lastActor as EnrichedUser<UT>)}
-        image={lastActor.data.profileImage}
-        circle
-        size={30}
-      />
+      {avatarRenderer ? (
+        avatarRenderer(lastActor as EnrichedUser<UT>)
+      ) : (
+        <Avatar
+          onClick={handleUserClick?.(lastActor as EnrichedUser<UT>)}
+          image={lastActor.data.profileImage}
+          circle
+          size={30}
+        />
+      )}
 
       <div className="raf-notification__content">
         <div className="raf-notification__header">
@@ -173,7 +204,7 @@ export const Notification = <
           <small>{humanizeTimestamp(latestActivity.time, tDateTimeParser)}</small>
         </div>
         {latestActivity.verb !== 'follow' && (
-          <AttachedActivity activity={latestActivity.object as EnrichedActivity<UT, AT, CT, RT, CRT>} />
+          <AttachedActivity activity={lastObject as EnrichedActivity<UT, AT, CT, RT, CRT>} />
         )}
       </div>
 

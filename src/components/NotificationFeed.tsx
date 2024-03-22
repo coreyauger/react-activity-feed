@@ -1,13 +1,13 @@
-import React, { useEffect } from 'react';
-import { NotificationActivityEnriched, UR } from 'getstream';
+import React, { ReactElement, useEffect } from 'react';
+import { EnrichedUser, NotificationActivityEnriched, UR } from 'getstream';
 
-import { Feed, FeedManagerProps, FeedProps, DefaultUT, DefaultAT, useFeedContext } from '../context';
+import { Feed, FeedManagerProps, FeedProps, DefaultUT, DefaultAT, useFeedContext, FeedManager } from '../context';
 import { NewActivitiesNotification, NewActivitiesNotificationProps } from './NewActivitiesNotification';
 import { LoadMorePaginator, LoadMorePaginatorProps } from './LoadMorePaginator';
 import { Notification, NotificationProps } from './Notification';
 import { LoadingIndicator as DefaultLoadingIndicator, LoadingIndicatorProps } from 'react-file-utils';
 import { FeedPlaceholder, FeedPlaceholderProps } from './FeedPlaceholder';
-import { smartRender, ElementOrComponentOrLiteralType } from '../utils';
+import { smartRender, ElementOrComponentOrLiteralType, OnClickUserHandler } from '../utils';
 
 type NotificationFeedInnerProps<
   UT extends DefaultUT = DefaultUT,
@@ -37,8 +37,16 @@ type NotificationFeedInnerProps<
    * #FeedPlaceholder (Component)#
    */
   Placeholder: ElementOrComponentOrLiteralType<FeedPlaceholderProps>;
+  avatarRenderer?: (actor: EnrichedUser<UT>) => ReactElement;
+  /** Callback to call when clicking on a notification */
+  onClickNotification?: (activityGroup: NotificationActivityEnriched<UT, AT, CT, RT, CRT>) => void;
+  /** Callback to call when clicking on a user in the notification */
+  onClickUser?: OnClickUserHandler<UT>;
+  /** Callback to mark a notification as read, if not supplied the dropdown used to mark as read will not be shown */
+  onMarkAsRead?: FeedManager<UT, AT, CT, RT, CRT>['onMarkAsRead'];
   /** Read options for the API client (eg. limit, ranking, ...) */
   options?: FeedProps['options'];
+  renderNotification?: (activityGroup: NotificationActivityEnriched<UT, AT, CT, RT, CRT>) => ReactElement;
 };
 
 export type NotificationFeedProps<
@@ -80,6 +88,11 @@ const NotificationFeedInner = <
   Paginator,
   Placeholder,
   options,
+  avatarRenderer,
+  onMarkAsRead,
+  onClickUser,
+  onClickNotification,
+  renderNotification,
 }: NotificationFeedInnerProps<UT, AT, CT, RT, CRT>) => {
   const feed = useFeedContext<UT, AT, CT, RT, CRT, PT>();
 
@@ -113,6 +126,11 @@ const NotificationFeedInner = <
             children: feed.activityOrder.map((id) =>
               smartRender<NotificationProps<UT, AT, CT, RT, CRT>>(Group, {
                 activityGroup: feed.activities.get(id)?.toJS() as NotificationActivityEnriched<UT, AT, CT, RT, CRT>,
+                avatarRenderer,
+                onMarkAsRead,
+                onClickUser,
+                onClickNotification,
+                renderNotification,
                 // @ts-expect-error
                 key: id,
               }),
@@ -150,6 +168,11 @@ export const NotificationFeed = <
   Paginator = LoadMorePaginator,
   Placeholder = FeedPlaceholder,
   LoadingIndicator = DefaultLoadingIndicator,
+  avatarRenderer,
+  onMarkAsRead,
+  onClickUser,
+  onClickNotification,
+  renderNotification,
 }: NotificationFeedProps<UT, AT, CT, RT, CRT, PT>) => {
   return (
     <Feed<UT, AT, CT, RT, CRT, PT>
@@ -173,6 +196,11 @@ export const NotificationFeed = <
         Paginator={Paginator}
         Placeholder={Placeholder}
         options={options}
+        avatarRenderer={avatarRenderer}
+        renderNotification={renderNotification}
+        onMarkAsRead={onMarkAsRead}
+        onClickUser={onClickUser}
+        onClickNotification={onClickNotification}
       />
     </Feed>
   );

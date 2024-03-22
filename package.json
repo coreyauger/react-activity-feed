@@ -1,10 +1,10 @@
 {
-  "name": "react-activity-feed",
-  "version": "1.4.0",
+  "name": "react18-activity-feed",
+  "version": "1.5.12",
   "description": "React components to create activity and notification feeds",
   "author": "GetStream",
   "license": "BSD-3-Clause",
-  "repository": "GetStream/react-activity-feed",
+  "repository": "coreyauger/react-activity-feed",
   "main": "dist/index.cjs.js",
   "module": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -19,7 +19,8 @@
     "dist"
   ],
   "engines": {
-    "node": "12 || >=14"
+    "node": ">=18.0.0",
+    "yarn": "^1.22.21"
   },
   "scripts": {
     "test": "jest",
@@ -42,7 +43,8 @@
     "prepare": "yarn run build && husky install",
     "preversion": "yarn install && yarn lint && yarn test",
     "version": "yarn docs-build && git add -A docs",
-    "postversion": "git push && git push --tags && npm publish"
+    "postversion": "git push && git push --tags && npm publish",
+    "deploy": "yarn publish dist --access=public"
   },
   "peerDependencies": {
     "react": "^17.0.0 || ^16.8.0",

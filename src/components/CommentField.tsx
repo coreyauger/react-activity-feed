@@ -22,7 +22,7 @@ export type CommentFieldProps<
      */
     emojiData?: EmojiDataSet;
     image?: string;
-    onSuccess?: () => void;
+    onSuccess?: (kind: string, activity: Activity<AT>, text: string) => void;
     placeholder?: string;
     targetFeeds?: string[];
     trigger?: TextareaProps['trigger'];
@@ -57,8 +57,8 @@ export const CommentField = <UT extends DefaultUT = DefaultUT, AT extends Defaul
       console.error(error);
     }
 
+    onSuccess?.('comment', activity as Activity<AT>, text);
     setText('');
-    onSuccess?.();
   };
 
   useEffect(() => {

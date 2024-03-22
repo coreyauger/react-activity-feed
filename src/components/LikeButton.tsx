@@ -16,6 +16,7 @@ export type LikeButtonProps<
 > = PropsWithElementAttributes<{
   /** The activity received from stream that should be liked when pressing the LikeButton. */
   activity?: EnrichedActivity<UT, AT, CT, RT, CRT>;
+  onLike?: (activity: Activity<AT>) => void;
   /** The reaction received from stream that should be liked when pressing the LikeButton. */
   reaction?: EnrichedReaction<RT, CRT, UT>;
   /** onAddReaction supports targetFeeds that you can use to send a notification to the post owner like ["notification:USER_ID"] */
@@ -35,6 +36,7 @@ export const LikeButton = <
   targetFeeds,
   className,
   style,
+  onLike,
 }: LikeButtonProps<UT, AT, CT, RT, CRT>) => {
   const feed = useFeedContext<UT, AT, CT, RT, CRT, PT>();
 
@@ -52,7 +54,10 @@ export const LikeButton = <
       kind="like"
       onPress={() => {
         if (reaction) return feed.onToggleChildReaction('like', reaction as Reaction<RT>, {} as CRT, { targetFeeds });
-        if (activity) return feed.onToggleReaction('like', activity as Activity<AT>, {} as RT, { targetFeeds });
+        if (activity) {
+          if (onLike) onLike(activity as Activity<AT>);
+          return feed.onToggleReaction('like', activity as Activity<AT>, {} as RT, { targetFeeds });
+        }
         return Promise.resolve();
       }}
       activeIcon={<ThumbsUpIcon style={{ color: Color.Active }} />}
