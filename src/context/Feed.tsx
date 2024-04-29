@@ -30,6 +30,7 @@ export type FeedContextValue<
   hasDoneRequest: boolean;
   hasNextPage: boolean;
   hasReverseNextPage: boolean;
+  client?: StreamClient<UT, AT, CT, RT, CRT, PT>;
   userId?: string;
 } & Pick<
   FeedManager<UT, AT, CT, RT, CRT, PT>,
@@ -188,6 +189,7 @@ export function Feed<
   if (!manager) return null;
 
   const ctx = {
+    client: client == null ? undefined : client,
     feedGroup,
     userId,
     feedManager: manager,

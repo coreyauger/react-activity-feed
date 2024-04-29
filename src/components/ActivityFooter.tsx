@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { Activity, UR } from 'getstream';
 
 import { LikeButton } from './LikeButton';
-import { RepostButton } from './RepostButton';
+//import { RepostButton } from './RepostButton';
 import { Flex } from './Flex';
 import { DefaultAT, DefaultUT } from '../context/StreamApp';
 import { ActivityProps } from './Activity';
@@ -27,8 +27,8 @@ export const ActivityFooter = <
   CRT extends UR = UR
 >({
   activity,
-  feedGroup = 'user',
-  userId,
+  //feedGroup = 'user',
+  //userId,
   onLike,
   targetFeeds,
   className,
@@ -39,12 +39,12 @@ export const ActivityFooter = <
     <div className="raf-activity-footer__right">
       <Flex a="center">
         <LikeButton<UT, AT, CT, RT, CRT> onLike={onLike} activity={activity} targetFeeds={targetFeeds} />
-        <RepostButton<UT, AT, CT, RT, CRT>
+        {/* <RepostButton<UT, AT, CT, RT, CRT>
           activity={activity}
           targetFeeds={targetFeeds}
           feedGroup={feedGroup}
           userId={userId}
-        />
+        /> */}
       </Flex>
     </div>
   </div>

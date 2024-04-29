@@ -1,7 +1,16 @@
 import React, { ReactElement, useEffect } from 'react';
 import { EnrichedUser, NotificationActivityEnriched, UR } from 'getstream';
 
-import { Feed, FeedManagerProps, FeedProps, DefaultUT, DefaultAT, useFeedContext, FeedManager } from '../context';
+import {
+  Feed,
+  FeedManagerProps,
+  FeedProps,
+  DefaultUT,
+  DefaultAT,
+  useFeedContext,
+  FeedManager,
+  FeedContextValue,
+} from '../context';
 import { NewActivitiesNotification, NewActivitiesNotificationProps } from './NewActivitiesNotification';
 import { LoadMorePaginator, LoadMorePaginatorProps } from './LoadMorePaginator';
 import { Notification, NotificationProps } from './Notification';
@@ -39,7 +48,10 @@ type NotificationFeedInnerProps<
   Placeholder: ElementOrComponentOrLiteralType<FeedPlaceholderProps>;
   avatarRenderer?: (actor: EnrichedUser<UT>) => ReactElement;
   /** Callback to call when clicking on a notification */
-  onClickNotification?: (activityGroup: NotificationActivityEnriched<UT, AT, CT, RT, CRT>) => void;
+  onClickNotification?: (
+    activityGroup: NotificationActivityEnriched<UT, AT, CT, RT, CRT>,
+    context?: FeedContextValue,
+  ) => void;
   /** Callback to call when clicking on a user in the notification */
   onClickUser?: OnClickUserHandler<UT>;
   /** Callback to mark a notification as read, if not supplied the dropdown used to mark as read will not be shown */

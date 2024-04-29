@@ -14,7 +14,7 @@ import {
   OnClickUserHandler,
   PropsWithElementAttributes,
 } from '../utils';
-import { DefaultUT, DefaultAT, useTranslationContext, FeedManager } from '../context';
+import { DefaultUT, DefaultAT, useTranslationContext, FeedManager, useFeedContext, FeedContextValue } from '../context';
 
 export type NotificationProps<
   UT extends DefaultUT = DefaultUT,
@@ -28,7 +28,10 @@ export type NotificationProps<
   /** Callback to render avatar */
   avatarRenderer?: (actor: EnrichedUser<UT>) => ReactElement;
   /** Callback to call when clicking on a notification */
-  onClickNotification?: (activityGroup: NotificationActivityEnriched<UT, AT, CT, RT, CRT>) => void;
+  onClickNotification?: (
+    activityGroup: NotificationActivityEnriched<UT, AT, CT, RT, CRT>,
+    context?: FeedContextValue,
+  ) => void;
   /** Callback to call when clicking on a user in the notification */
   onClickUser?: OnClickUserHandler<UT>;
   /** Callback to mark a notification as read, if not supplied the dropdown used to mark as read will not be shown */
@@ -146,8 +149,8 @@ export const Notification = <
   const { activities } = activityGroup;
   const [latestActivity, ...restOfActivities] = activities;
 
-  //console.log("latestActivity", latestActivity);
-  //if (typeof latestActivity.object === 'string') return null;
+  if (renderNotification) return renderNotification(activityGroup);
+  const context = useFeedContext();
 
   const lastObject =
     typeof latestActivity.object === 'string'
@@ -159,13 +162,11 @@ export const Notification = <
   const handleNotificationClick = onClickNotification
     ? (e: SyntheticEvent) => {
         e.stopPropagation();
-        onClickNotification(activityGroup);
+        onClickNotification(activityGroup, context);
       }
     : undefined;
 
-  return renderNotification ? (
-    renderNotification(activityGroup)
-  ) : (
+  return (
     <div
       onClick={handleNotificationClick}
       className={className ?? `raf-notification ${activityGroup.is_read ? 'raf-notification--read' : ''}`}

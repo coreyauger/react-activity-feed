@@ -3,7 +3,7 @@ import { Activity, NewActivity, UR } from 'getstream';
 import {
   FilePreviewer,
   FileUpload,
-  FileUploadButton,
+  //FileUploadButton,
   ImageDropzone,
   ImagePreviewer,
   ImageUpload,
@@ -192,9 +192,9 @@ export function StatusUpdateForm<
                 <div style={{ marginRight: '32px', display: 'inline-block' }}>
                   <ImageUploadButton resetOnChange handleFiles={state.uploadNewFiles} multiple />
                 </div>
-                <div style={{ marginRight: '32px', display: 'inline-block' }}>
+                {/* <div style={{ marginRight: '32px', display: 'inline-block' }}>
                   <FileUploadButton handleFiles={state.uploadNewFiles} multiple />
-                </div>
+                </div> */}
                 <EmojiPicker onSelect={state.onSelectEmoji} emojiData={emojiData} i18n={emojiI18n} />
                 {FooterItem}
               </div>

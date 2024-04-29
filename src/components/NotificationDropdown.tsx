@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
-import { EnrichedUser, UR } from 'getstream';
+import { EnrichedUser, NotificationActivityEnriched, UR } from 'getstream';
 
 import { Feed, useFeedContext, DefaultAT, DefaultUT } from '../context';
 import { smartRender, ElementOrComponentOrLiteralType, PropsWithElementAttributes } from '../utils';
@@ -21,6 +21,7 @@ export type NotificationDropdownProps<
     /** Callback to render avatar */
     avatarRenderer?: (actor: EnrichedUser<UT>) => ReactElement;
     Icon?: ElementOrComponentOrLiteralType;
+    renderNotification?: (activityGroup: NotificationActivityEnriched<UT, AT, CT, RT, CRT>) => ReactElement;
     width?: number;
   } & Pick<DropdownPanelProps, 'Footer' | 'Header' | 'right'> &
     NotificationFeedProps<UT, AT, CT, RT, CRT, PT>
@@ -42,6 +43,7 @@ const NotificationDropdownInner = <
   className,
   style,
   avatarRenderer,
+  renderNotification,
   ...feedProps
 }: NotificationDropdownProps<UT, AT, CT, RT, CRT, PT>) => {
   const feed = useFeedContext<UT, AT, CT, RT, CRT, PT>();
@@ -68,7 +70,7 @@ const NotificationDropdownInner = <
       >
         {open && (
           <DropdownPanel arrow right={right} Header={Header} Footer={Footer}>
-            <NotificationFeed avatarRenderer={avatarRenderer} {...feedProps} />
+            <NotificationFeed renderNotification={renderNotification} avatarRenderer={avatarRenderer} {...feedProps} />
           </DropdownPanel>
         )}
       </div>
@@ -95,6 +97,7 @@ export const NotificationDropdown = <
   right,
   feedGroup = 'notification',
   avatarRenderer,
+  renderNotification,
   options,
   ...feedProps
 }: NotificationDropdownProps<UT, AT, CT, RT, CRT, PT>) => {
@@ -108,6 +111,7 @@ export const NotificationDropdown = <
         Header={Header}
         Icon={Icon}
         avatarRenderer={avatarRenderer}
+        renderNotification={renderNotification}
         right={right}
         {...feedProps}
         feedGroup={feedGroup}
